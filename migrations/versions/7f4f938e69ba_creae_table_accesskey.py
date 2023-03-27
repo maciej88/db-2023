@@ -17,7 +17,8 @@ depends_on = None
 
 def upgrade() -> None:
     op.execute("""
-        create table accesskey
+    --sql
+    create table accesskey
 (
     keyid uuid DEFAULT gen_random_uuid() primary key,
     name  text not null UNIQUE
