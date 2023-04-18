@@ -26,3 +26,23 @@ class CrewEntry:
     id: int  # id of ... the person?
     job: str
     name: str
+
+@dataclass
+class MovesEntry:
+    move_id: int
+    title: str
+
+@dataclass
+class ActorsEntry:
+    actor_id: int
+    name: str
+
+@dataclass
+class MoveActorsEntry:
+    credit_id: str
+    move_id: int
+    actor_id: int
+    cast_id: int
+    character: str
+    gender: int
+    order: int
