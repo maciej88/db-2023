@@ -28,8 +28,8 @@ class CrewEntry:
     name: str
 
 @dataclass
-class MovesEntry:
-    move_id: int
+class MoviesEntry:
+    movie_id: int
     title: str
 
 @dataclass
@@ -38,9 +38,9 @@ class ActorsEntry:
     name: str
 
 @dataclass
-class MoveActorsEntry:
+class MovieActorsEntry:
     credit_id: str
-    move_id: int
+    movie_id: int
     actor_id: int
     cast_id: int
     character: str
