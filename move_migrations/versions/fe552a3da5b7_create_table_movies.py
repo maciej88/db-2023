@@ -29,5 +29,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute(
         f"""--sql
-        drop table if exists movies cascade
+        drop table if exists moves cascade
         """)
