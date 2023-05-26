@@ -8,7 +8,7 @@ import pandas as pd
 
 import json
 
-from db_class import DbService
+from db_service import DbService
 
 from model import Movie
 from src.movies.analysis_tools import *
@@ -23,7 +23,7 @@ async def main():
     print(f'all actors: {len(actors)}')
 
     for i, actor in enumerate(actors):
-        await db.upsert_movie_actor(actor)
+        await db.upsert_movieactor(actor)
         if i % 100 == 0:
             print(f'import in {i / len(actors) * 100:.1f}% done')
 

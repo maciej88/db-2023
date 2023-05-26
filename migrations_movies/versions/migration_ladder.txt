@@ -5,3 +5,11 @@ aed1fafe8100	create table movie_actors
 b355e311da60	create table movie_genres
 1dd498a89864	create table pcountries
 03a94830a8ac	create table movie_pcountries
+ca4621e08ef9    create table crew
+f01147f524ff    create table movie_crew
+cfcc486111e3    create table keywords
+4573c47e2a60    create table movie_keywords
+f2fa8aa8906f    create table languages
+9a5bd69dadde    create table movie_languages
+bd4f5200f83a    create table prod_companies
+80f883d33378    create table movie_prod_companies

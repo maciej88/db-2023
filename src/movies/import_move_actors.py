@@ -8,15 +8,15 @@ import psycopg2
 from psycopg2 import extras
 
 dotenv_path = Path('../.env')
-# load_dotenv()
-# conn = psycopg2.connect(
-#     database=os.getenv("DATABASE"),
-#     user="postgres",
-#     password=os.getenv("PASSWORD"),
-#     host=os.getenv("HOST"),
-#     port=os.getenv("PORT"))
+load_dotenv()
+conn = psycopg2.connect(
+    database=os.getenv("DATABASE"),
+    user="postgres",
+    password=os.getenv("PASSWORD"),
+    host=os.getenv("HOST"),
+    port=os.getenv("PORT"))
 
-df = pd.read_csv("./data/tmdb_5000_credits.csv")
+df = pd.read_csv("data/tmdb_5000_credits.csv")
 
 # able1_df = pd.read_sql_query("SELECT movie_id FROM s3878movie.movies", conn)
 # table2_df = pd.read_sql_query("SELECT actor_id FROM s3878movie.actors", conn)

@@ -143,7 +143,7 @@ def get_movie_actors(filename: str) -> Iterable[MovieActor]:
 def to_movie_actor(cast_entry: CastEntry) -> MovieActor:
     c = cast_entry
     return MovieActor(movie_id=c.movie_index, actor_id=c.id, cast_id=c.cast_id, credit_id=c.credit_id,
-                      character=c.character, gender=c.gender, position=c.order)
+                      character=c.character, gender=c.gender, order_=c.order)
 
 
 def get_movies(filename: str) -> Iterable[Movie]:
@@ -213,6 +213,145 @@ def get_movie_pcountries(filename):
 
     return entries
 
+def get_crew():
+    df = pd.read_csv('data/tmdb_5000_credits.csv')
+    crews = list(df['crew']) # DELETE HEAD BEFORE IMPORT!!!!
+    enter_data = set()
+    for i in crews:
+        dictionaries = json.loads(i)
+        for j in dictionaries:
+            data = Crew(crew_id=j['id'], gender=j['gender'], name=j['name'])
+            if data not in enter_data:
+                enter_data.add(data)
+    return enter_data
+
+
+def get_moviecrew() -> list[MovieCrew]:
+    df = pd.read_csv('data/tmdb_5000_credits.csv')
+    df_sub = df.loc[:, ['movie_id', 'crew']]  # wycinek tabel
+    df_as_dict = df_sub.to_dict(orient='records')
+    res = []
+    for row in df_as_dict:
+        movie_id = row['movie_id']
+        crew_as_str = row['crew']
+        all_crews = get_crew_movie(movie_id, crew_as_str)
+        all_crews = [to_movie_crew(c) for c in all_crews]
+        res.extend(all_crews)
+    return res
+
+def get_crew_movie(movie_id: int, crew_field: str) -> list[EntryOfCrew]:
+    dicts = json.loads(crew_field)
+    entries = []
+    for d in dicts:
+        entry = EntryOfCrew(movie_id=movie_id, **d)
+        entries.append(entry)
+    return entries
+
+def to_movie_crew(crew_entry: EntryOfCrew) -> MovieCrew:
+    e = crew_entry
+    return MovieCrew(movie_id=e.movie_id, crew_id=e.id, credit_id=e.credit_id,
+                     department=e.department, job=e.job, gender=e.gender, name=e.name)
+
+
+def get_keyword_of_movie(keyword_field: str) -> list[Keyword]:
+    dicts = json.loads(keyword_field)
+    entries = []
+    for d in dicts:
+        entry = Keyword(keyword_id=d['id'], name=d['name'])
+        entries.append(entry)
+    return entries
+
+
+def get_keywords() -> Iterable[Keyword]:
+    df = pd.read_csv('data/tmdb_5000_movies.csv')
+    keyword_list = list(df['keywords'])
+    keywords = []
+    for keyword in keyword_list:
+        entries = get_keyword_of_movie(keyword)
+        keywords.extend(entries)
+    keywords = set(keywords)
+    return keywords
+
+
+def get_movie_keywords() -> list[MovieKeyword]:
+    df = pd.read_csv('data/tmdb_5000_movies.csv')
+    df_sub = df.loc[:, ['id', 'keywords']]
+    df_as_dict = df_sub.to_dict(orient='records')
+    entries = []
+    for movie in df_as_dict:
+        keywords = json.loads(movie.get('keywords'))
+        for keyword in keywords:
+            entry = MovieKeyword(movie_id=movie.get('id'), keyword_id=keyword['id'])
+            entries.append(entry)
+
+    return entries
+
+def get_spoken_langs(filename: str):
+    df = pd.read_csv(filename)
+    spoken_langs = list(df['spoken_languages'])
+    entries = []
+    for spoken in spoken_langs:
+        dicts = json.loads(spoken)
+        for d in dicts:
+            entry = Language(lang_id=d['iso_639_1'], lang=d['name'])
+            if entry not in entries:
+                entries.append(entry)
+
+    return entries
+
+def get_movie_lang(filename: str):
+
+    df = pd.read_csv(filename) #movies.csv
+    subframe = df.loc[:, ['id', 'original_language']]
+    subframe_as_dict = subframe.to_dict(orient='records')
+    movie_lang = [MovieLanguage(movie_id=d['id'], lang_id=d['original_language'])\
+              for d in subframe_as_dict]
+
+    return(movie_lang)
+
+def get_companies() -> list[Company]:
+    """COMPANY object"""
+    df= pd.read_csv('data/tmdb_5000_movies.csv')
+    comps = df['production_companies']
+    entries = []
+    for c in comps:
+        dicts = json.loads(c)
+        for d in dicts:
+            entry = Company(**d)
+            if entry not in entries:
+                entries.append(entry)
+
+    return entries
+
+def companies_for_movie(index: int, company_field: str):
+    """COMPANY ENTRY object"""
+    dicts = json.loads(company_field)
+    comps = []
+    for d in dicts:
+        company = CompanyEntry(index, **d)
+        comps.append(company)
+
+    return comps
+
+def get_company_of_movie() -> list[MovieCompany]:
+
+    df= pd.read_csv('data/tmdb_5000_movies.csv')
+    subframe = df.loc[:, ['id', 'production_companies']]
+    subframe_as_dict = subframe.to_dict(orient='records')
+
+    result = []
+    for r, row in enumerate(subframe_as_dict):
+        movie_id = row['id']
+        comps = row['production_companies']
+        all_comps = companies_for_movie(movie_id, comps)
+        mov_comp = [to_moviecompany(ac) for ac in all_comps]
+        result.extend(mov_comp)
+
+    return result
+
+def to_moviecompany(company_entry: CompanyEntry) -> MovieCompany:
+    ce = company_entry
+    return MovieCompany(movie_id=ce.movie_index, company_id=ce.id)
 
 if __name__ == '__main__':
     # df = pd.read_csv('data/tmdb_5000_credits.csv')

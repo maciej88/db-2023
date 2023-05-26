@@ -4,3 +4,4 @@ psycopg2-binary
 loguru
 asyncpg
 pandas
+sqlalchemy
