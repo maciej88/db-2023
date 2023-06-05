@@ -74,8 +74,11 @@ class DbService:
 
         return File(**dict(row))
 
-    async def delete_file(self):
-        pass
+    async def delete_file(self, file_id: int):
+        async with self.pool.acquire() as connection:
+            await connection.execute('DELETE from files where file_id=$1', file_id)
+        return print(f"Deleted by id: {file_id}")
+
 
     async def heal_file_id(self):
         async with self.pool.acquire() as connection:
@@ -86,13 +89,14 @@ if __name__ == '__main__':
     async def try_it():
         db = DbService()
         await db.initialize()
-        now = datetime.now()
-
-        f = File(file_id=10 + 10 ** 6, name='gs', bytes=10, depth=2, accessed=now, modified=now,
-                 basename='gs', extension='', type='f', mode='-rwxrwxrwx', parent_path='/', full_path='/gs')
-        f_ = await db.upsert_file(f)
-        await db.heal_file_id()
-        print(f_)
+        await db.delete_file(1)
+        # now = datetime.now()
+        #
+        # f = File(file_id=10 + 10 ** 6, name='gs', bytes=10, depth=2, accessed=now, modified=now,
+        #          basename='gs', extension='', type='f', mode='-rwxrwxrwx', parent_path='/', full_path='/gs')
+        # f_ = await db.upsert_file(f)
+        # await db.heal_file_id()
+        # print(f_)
 
 
     asyncio.run(try_it())
