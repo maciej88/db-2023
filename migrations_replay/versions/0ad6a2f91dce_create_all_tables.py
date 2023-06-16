@@ -35,8 +35,8 @@ CREATE TABLE video(
 );
 
 CREATE TABLE video_likes(
-    video_id UUID NOT NULL REFERENCES video(video_id),
-    channel_id UUID NOT NULL REFERENCES channel(channel_id),
+    video_id UUID UNIQUE NOT NULL REFERENCES video(video_id),
+    channel_id UUID UNIQUE NOT NULL REFERENCES channel(channel_id),
     is_like BOOLEAN NOT NULL
 );
 
@@ -46,8 +46,8 @@ CREATE TABLE video_views(
 );
 
 CREATE TABLE video_flags(
-    video_id UUID NOT NULL REFERENCES video(video_id),
-    channel_id UUID NOT NULL REFERENCES channel(channel_id)
+    video_id UUID UNIQUE NOT NULL REFERENCES video(video_id),
+    channel_id UUID UNIQUE NOT NULL REFERENCES channel(channel_id)
 );
 
 CREATE TABLE comment(
@@ -61,8 +61,8 @@ CREATE TABLE comment(
 );
 
 CREATE TABLE comment_likes(
-    comment_id UUID NOT NULL REFERENCES comment(comment_id),
-    channel_id UUID NOT NULL REFERENCES channel(channel_id),
+    comment_id UUID UNIQUE NOT NULL REFERENCES comment(comment_id),
+    channel_id UUID UNIQUE NOT NULL REFERENCES channel(channel_id),
     is_like BOOLEAN NOT NULL
 );
 
@@ -89,5 +89,14 @@ CREATE TABLE playlist_views(
 
 def downgrade() -> None:
     op.execute("""
-         -- consider droping the tables -- plz commit to your repo -- I will gladly cherry-pick this up
+    DROP TABLE IF EXISTS channel CASCADE; 
+    DROP TABLE IF EXISTS comment CASCADE;
+    DROP TABLE IF EXISTS comment_likes CASCADE; 
+    DROP TABLE IF EXISTS playlist CASCADE;
+    DROP TABLE IF EXISTS playlist_video CASCADE;
+    DROP TABLE IF EXISTS playlist_views CASCADE;
+    DROP TABLE IF EXISTS video CASCADE;
+    DROP TABLE IF EXISTS video_flags CASCADE;
+    DROP TABLE IF EXISTS video_likes CASCADE;
+    DROP TABLE IF EXISTS video_views CASCADE;
     """)
