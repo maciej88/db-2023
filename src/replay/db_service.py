@@ -37,9 +37,13 @@ class DbService:
                 await connection.fetch('insert into video_likes(video_id, channel_id, is_like)'
                                        'values ($1, $2, $3) returning *', video_id, channel_id, like_level)
 
-    async def remove_like(self, video_id: UUID, channel_id: UUID):
-        # delete from video_likes where video_id=$1 and channel_id=$2
-        pass
+    async def remove_like(self, video_id: UUID, channel_id: UUID) -> None:
+        async with self.pool.acquire() as connection:
+            deleted = await connection.fetch("""SELECT * FROM video_likes WHERE video_id=$1 and channel_id=$2""",
+                                             video_id, channel_id)
+            await connection.execute("""DELETE from video_likes where video_id=$1 and channel_id=$2""",
+                                     video_id, channel_id)
+        return print(f"Deleted {[VideoLike(**dict(d)) for d in deleted]}")
 
     async def is_top_level_comment(self, parent_id: UUID) -> bool:
         async with self.pool.acquire() as connection:
@@ -75,8 +79,9 @@ async def main_():
     videos = await db.get_videos()
     print(videos)
     video_id, user_id = UUID('771c8d3e-1c32-4a9b-9cb1-6c278b52580c'), UUID('8aa66945-77b2-4bb2-bd17-00da523c561e')
-    await db.set_like(video_id, user_id, like_level=True)
-    await db.post_comment(user_id, 'test', video_id, parent_comment=None)
+    # await db.set_like(video_id, user_id, like_level=True)
+    # await db.post_comment(user_id, 'test', video_id, parent_comment=None)
+    await db.remove_like(video_id=video_id, channel_id=user_id)
 
 
 if __name__ == '__main__':

@@ -39,6 +39,11 @@ class Playlist:
     created: datetime
     edited: datetime
 
+@dataclass
+class VideoLike:
+    video_id: UUID
+    channel_id: UUID
+    is_like: bool
 
 class ReplayException(RuntimeError):
     pass
