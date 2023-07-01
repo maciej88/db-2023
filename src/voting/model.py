@@ -4,25 +4,25 @@ from uuid import UUID, uuid4
 
 @dataclass
 class User:
-    uid: UUID
+    user_id: UUID
     name: str
 
 
 @dataclass
 class Election:
-    eid: UUID
+    election_id: UUID
     name: str
 
 
 @dataclass
 class Token:
-    eid: UUID
-    tokenid: UUID
+    election_id: UUID
+    token_id: UUID
 
 
 @dataclass
 class Vote:
-    eid: UUID
+    election_id: UUID
     votevalue: int
 
 

@@ -4,6 +4,7 @@ from asyncio import run, create_task
 from datetime import datetime
 from os import getenv
 from random import choice
+import uuid
 
 import asyncpg
 from dotenv import load_dotenv
@@ -26,16 +27,30 @@ class DbService:
         print(f'connected to [{URL}]')
 
     async def create_user(self, user: User) -> User:
-        pass
+        async with self.pool.acquire() as connection:
+            row = await connection.fetchrow(
+                """insert into Users(user_id, name) 
+                    VALUES ($1,$2) returning *""", user.user_id, user.name)
+        return User(**dict(row))
 
     async def delete_user(self, uid: uuid):
-        pass
+        async with self.pool.acquire() as connection:
+            deleted = await connection.fetch("""SELECT * FROM Users WHERE user_id=$1""", uid)
+            await connection.execute("""DELETE FROM Users WHERE user_id=$1""", uid)
+        return print(f"Deleted {[User(**dict(d)) for d in deleted]}")
 
-    async def create_election(self, user: User) -> User:
-        pass
+    async def create_election(self, election: Election) -> Election:
+        async with self.pool.acquire() as connection:
+            row = await connection.fetchrow(
+                """insert into Elections(election_id, name) 
+                    VALUES ($1,$2) returning *""", election.election_id, election.name)
+        return Election(**dict(row))
 
     async def delete_election(self, eid: uuid):
-        pass
+        async with self.pool.acquire() as connection:
+            deleted = await connection.fetch("""SELECT * FROM Elections WHERE election_id=$1""", eid)
+            await connection.execute("""DELETE * FROM Elections WHERE election_id=$1""", eid)
+        return print(f"Deleted {[Election(**dict(d)) for d in deleted]}")
 
 
     async def register_for_election(self, eid: uuid, uid: uuid) -> uuid:
@@ -72,6 +87,14 @@ async def main():
     db = DbService()
     await db.initialize()
 
+    e = Election(election_id=uuid.uuid1(), name='Li')
+    e_ = await db.create_election(e)
+    print(e_)
+    # d = User(user_id='c72529f0-175b-11ee-b229-695f43ebc72c')
+    # d_ = await db.delete_user('c72529f0-175b-11ee-b229-695f43ebc72c')
+    # print(d_)
+
 
 if __name__ == '__main__':
     run(main())
+
