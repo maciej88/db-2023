@@ -26,6 +26,12 @@ class Vote:
     votevalue: int
 
 
+@dataclass
+class Participation:
+    uid: UUID
+    eid: UUID
+
+
 class VotingError(RuntimeError):
     pass
 
