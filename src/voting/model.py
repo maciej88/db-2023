@@ -31,4 +31,7 @@ class VotingError(RuntimeError):
 
 
 if __name__ == '__main__':
-    pass
+    try:
+        raise VotingError('ha ha ha')
+    except RuntimeError as e:
+        print(e)

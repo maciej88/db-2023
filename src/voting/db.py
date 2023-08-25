@@ -4,7 +4,6 @@ from asyncio import run, create_task
 from datetime import datetime
 from os import getenv
 from random import choice
-import uuid
 
 import asyncpg
 from dotenv import load_dotenv
@@ -27,30 +26,42 @@ class DbService:
         print(f'connected to [{URL}]')
 
     async def create_user(self, user: User) -> User:
+        query = """
+               INSERT INTO users (uid, name) VALUES ($1, $2) RETURNING *
+           """
+        values = (user.uid, user.name)
         async with self.pool.acquire() as connection:
-            row = await connection.fetchrow(
-                """insert into Users(user_id, name) 
-                    VALUES ($1,$2) returning *""", user.user_id, user.name)
-        return User(**dict(row))
+            result = await connection.fetchrow(query, *values)
+        res = User(*result)
+        print(f'Created election: {res}')
+        return res
 
     async def delete_user(self, uid: uuid):
+        query = """
+               DELETE FROM users WHERE uid = $1
+           """
         async with self.pool.acquire() as connection:
-            deleted = await connection.fetch("""SELECT * FROM Users WHERE user_id=$1""", uid)
-            await connection.execute("""DELETE FROM Users WHERE user_id=$1""", uid)
-        return print(f"Deleted {[User(**dict(d)) for d in deleted]}")
+            await connection.execute(query, uid)
+            print(f'Removed user {uid}')
 
     async def create_election(self, election: Election) -> Election:
+        query = """
+               INSERT INTO elections (eid, name) VALUES ($1, $2) RETURNING *
+           """
+        values = (election.eid, election.name)
         async with self.pool.acquire() as connection:
-            row = await connection.fetchrow(
-                """insert into Elections(election_id, name) 
-                    VALUES ($1,$2) returning *""", election.election_id, election.name)
-        return Election(**dict(row))
+            result = await connection.fetchrow(query, *values)
+        res = Election(*result)
+        print(f'Created election: {res}')
+        return res
 
     async def delete_election(self, eid: uuid):
+        query = """
+               DELETE FROM elections WHERE eid = $1
+           """
         async with self.pool.acquire() as connection:
-            deleted = await connection.fetch("""SELECT * FROM Elections WHERE election_id=$1""", eid)
-            await connection.execute("""DELETE * FROM Elections WHERE election_id=$1""", eid)
-        return print(f"Deleted {[Election(**dict(d)) for d in deleted]}")
+            await connection.execute(query, eid)
+            print(f'Removed election {eid}')
 
 
     async def register_for_election(self, eid: uuid, uid: uuid) -> uuid:
@@ -62,8 +73,9 @@ class DbService:
 
         :param eid:
         :param uid:
-        :return:
+        :return: token for the election
         """
+        pass
 
     async def vote(self, tokenid: uuid, votevalue: int) -> uuid:
         """
@@ -77,6 +89,7 @@ class DbService:
         :raises: VotingError if tokenid is invalid
         :return:
         """
+        pass
 
 
 def ts():
@@ -86,15 +99,15 @@ def ts():
 async def main():
     db = DbService()
     await db.initialize()
+    uid = uuid4()
+    user = await db.create_user(User(uid, 'xi'))
+    await db.delete_user(user.uid)
 
-    e = Election(election_id=uuid.uuid1(), name='Li')
-    e_ = await db.create_election(e)
-    print(e_)
-    # d = User(user_id='c72529f0-175b-11ee-b229-695f43ebc72c')
-    # d_ = await db.delete_user('c72529f0-175b-11ee-b229-695f43ebc72c')
-    # print(d_)
+    elect = await db.create_election(Election(uid, 'Wybory normalne'))
+    await db.delete_election(elect.eid)
+
+
 
 
 if __name__ == '__main__':
     run(main())
-
