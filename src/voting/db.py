@@ -104,23 +104,27 @@ class DbService:
                 """
 
         async with self.pool.acquire() as connection:
-            # Checking if already voted
-            votes_table = await connection.execute(query0, uid)
-            if int(votes_table[-1]) > 0:
-                raise VotingError('User has already voted.')
+            try:
+                async with connection.transaction(isolation='serializable') as tx:
+                    # Checking if already voted
+                    votes_table = await connection.execute(query0, uid)
+                    if int(votes_table[-1]) > 0:
+                        raise VotingError('User has already voted.')
 
-            await connection.execute(query1)
+                    await connection.execute(query1)
 
-            # Check if the `uid` or `eid` are valid.
-            if not is_valid_uuid(eid) or not is_valid_uuid(uid):
-                raise VotingError('Invalid uid or eid.')
+                    # Check if the `uid` or `eid` are valid.
+                    if not is_valid_uuid(eid) or not is_valid_uuid(uid):
+                        raise VotingError('Invalid uid or eid.')
 
-            await connection.execute(query2, uid, eid)
-            await connection.execute(query3, eid, new_token)
-            await connection.execute(query4)
-            res = new_token
-            print(f'token for voting: {new_token}')
-            return res
+                    await connection.execute(query2, uid, eid)
+                    await connection.execute(query3, eid, new_token)
+                    await connection.execute(query4)
+                    res = new_token
+                    print(f'token for voting: {new_token}')
+                    return res
+            except RuntimeError as e:
+                raise VotingError("NOPE!")
 
     async def vote(self, tokenid: uuid, votevalue: int) -> uuid:
         """
@@ -154,23 +158,24 @@ class DbService:
             COMMIT;
             """
         async with self.pool.acquire() as connection:
-            votes_table = await connection.execute(query1, tokenid)
-            # token validation:
-            if not int(votes_table[-1]) == 1 and not is_valid_uuid(tokenid):
-                raise VotingError('You going to prison!')
-            await connection.execute(query0)
-            eid = await connection.fetchval(query2, tokenid)
-            eid = str(eid)
-            print(eid)
-            print(votevalue)
-            values = (eid, votevalue)
-            print(*values)
-            result = await connection.fetchrow(query3, *values)
-            await connection.execute(query4, tokenid)
-            await connection.execute(query5)
-            print(f"You voted in {eid} as {votevalue}")
-            res = Vote(*result)
-            return res
+            try:
+                async with connection.transaction(isolation='serializable') as tx:
+                    votes_table = await connection.execute(query1, tokenid)
+                    # token validation:
+                    if not int(votes_table[-1]) == 1 and not is_valid_uuid(tokenid):
+                        raise VotingError('You going to prison!')
+                    await connection.execute(query0)
+                    eid = await connection.fetchval(query2, tokenid)
+                    eid = str(eid)
+                    values = (eid, votevalue)
+                    result = await connection.fetchrow(query3, *values)
+                    await connection.execute(query4, tokenid)
+                    await connection.execute(query5)
+                    print(f"You voted in {eid} as {votevalue}")
+                    res = Vote(*result)
+                    return res
+            except RuntimeError as e:
+                raise VotingError('NOPE!')
 
     async def create_token(self, token: Token) -> Token:
         query = """
@@ -182,6 +187,48 @@ class DbService:
         res = Token(*result)
         print(f'Created token: {res}')
         return res
+
+    async def create_participation(self, participation: Participation) -> Participation:
+        query = """
+        INSERT INTO participation (uid, eid) VALUES ($1, $2) RETURNING *;
+        """
+        values = (participation.uid, participation.eid)
+        async with self.pool.acquire() as connection:
+            result = await connection.fetchrow(query, *values)
+        res = Participation(*result)
+        return res
+
+    async def delete_token(self, tokenid: uuid):
+        query = """
+               DELETE FROM tokens WHERE tokenid = $1
+           """
+        async with self.pool.acquire() as connection:
+            await connection.execute(query, tokenid)
+            print(f'Removed token: {tokenid}')
+
+    async def delete_token_by_election(self, eid: uuid):
+        query = """
+               DELETE FROM tokens WHERE eid = $1
+           """
+        async with self.pool.acquire() as connection:
+            await connection.execute(query, eid)
+            print(f'Removed token: {eid}')
+
+    async def delete_last_token(self):
+        query = """
+        SELECT * FROM tokens ORDER BY tokenid DESC LIMIT 1;
+        """
+        async with self.pool.acquire() as connection:
+            await connection.execute(query)
+            print(f'Removed token: {query}')
+
+    async def delete_participation(self, uid: uuid) -> None:
+        query = """
+        DELETE FROM participation WHERE uid = $1;
+        """
+        async with self.pool.acquire() as connection:
+            await connection.execute(query, uid)
+            print(f'Removed participation for: {uid}')
 
 
 def ts():
@@ -197,9 +244,9 @@ async def main():
     # await db.register_for_election(
     #     uid='8f8a5b72-372f-46d6-99cb-091ae48cfc9c', eid='aff5b974-70fb-43d7-afe2-a9ed53048082')
     # await db.delete_election(elect.eid)
-    # await db.vote(tokenid='299c1d2c-1e03-4262-8360-fc6bcf29f99e', votevalue=1)
-    await db.create_token(Token(
-        eid='aff5b974-70fb-43d7-afe2-a9ed53048082', tokenid='299c1d2c-1e03-4262-8360-fc6bcf29f99e'))
+    await db.vote(tokenid='299c1d2c-1e03-4262-8360-fc6bcf29f99e', votevalue=1)
+    # await db.create_token(Token(
+    #     eid='aff5b974-70fb-43d7-afe2-a9ed53048082', tokenid='299c1d2c-1e03-4262-8360-fc6bcf29f99e'))
 
 
 if __name__ == '__main__':

@@ -4,13 +4,13 @@ from uuid import UUID, uuid4
 
 @dataclass
 class User:
-    user_id: UUID
+    uid: UUID
     name: str
 
 
 @dataclass
 class Election:
-    election_id: UUID
+    eid: UUID
     name: str
 
 
