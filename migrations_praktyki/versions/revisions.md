@@ -25,3 +25,10 @@ add filename to fagreement              e3031b716ab5
 remove not null on person.password      56891f97bbab
 update curriculum_vitae add not null filename 0e841de7ac41
 add application.created_at              ffafefc9a15e
+relations for ecdsa_keys                fd170fae94ac
+relations for signatures                52227cf80b2e
+relations for curriculum_vitae          e9cb8e05db26
+relations for days                      cb266a849744
+relations for audit_log                 9fdc6a3469fd
+relations for survey_questions          43cb111d4ac6
+uuid for persons student_id             a12914d6ed97

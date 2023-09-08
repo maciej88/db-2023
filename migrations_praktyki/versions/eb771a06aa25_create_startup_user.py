@@ -11,7 +11,7 @@ from uuid import UUID
 from alembic import op
 import sqlalchemy as sa
 
-from src.model.model import Role, Person
+from src.praktyki.model import Role, Person
 
 # DEFAULT USER DATA (note: remove in public deployments)
 person_id = UUID("11111111-1111-1111-1111-111111111111")
@@ -22,7 +22,8 @@ phone = '+48 111 222 444'
 passwd = "$argon2id$v=19$m=65536,t=3,p=4$rM+YZDGlQZUF2UAdMvFMQw$Bz1mmh66RogTipjqsgYXGg3h8Rm0f1J8woLl9ULj1SI"
 roles = "{3}"  # Role.ADMIN
 
-p = Person(person_id=person_id, name=name, email=email, phone=phone, password=passwd, roles=[Role.ADMIN])
+p = Person(person_id=person_id, name=name, email=email, phone=phone, password=passwd, roles=[Role.ADMIN],
+           studentid=None, album=None, wykladowcaid=None, company_id=None, uid_in_company=None)
 
 # revision identifiers, used by Alembic.
 revision = "eb771a06aa25"

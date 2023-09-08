@@ -3,6 +3,7 @@ from enum import IntEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from typing import Optional
 from src.praktyki.helpers import now
 
 
@@ -39,12 +40,12 @@ class Person(BaseModel):
     password: str | None = Field(exclude=True)  # Exclude password from being serialized by .dict() method
 
     # WSIZ identifiers
-    studentid: int | None
-    album: str | None
-    wykladowcaid: int | None
+    studentid: Optional[int] | None
+    album: Optional[str] | None
+    wykladowcaid: Optional[int] | None
     # external identifiers
-    company_id: UUID | None
-    uid_in_company: UUID | None
+    company_id: Optional[UUID] | None
+    uid_in_company: Optional[UUID] | None
 
     roles: list[Role]
     active: bool = True
