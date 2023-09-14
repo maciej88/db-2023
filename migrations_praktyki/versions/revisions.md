@@ -32,3 +32,10 @@ relations for days                      cb266a849744
 relations for audit_log                 9fdc6a3469fd
 relations for survey_questions          43cb111d4ac6
 uuid for persons student_id             a12914d6ed97
+relation_internship_periods_persons     e9ccd9c93278
+relation_applications_persons           30ac651782d2
+relation_signature_texts_persons        dc662c242256
+relation_internships_persons            dc662c242256
+relation_period_final_persons           20ca9d489f50
+relation_internship_agreements_persons  4cf82557cb6e
+relation_applications_curriculum_vitae  ffa6b01e1b8d

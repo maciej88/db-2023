@@ -1,0 +1,20 @@
+DELETE FROM persons WHERE person_id != {tu wpisać UUID osoby którą chcemy zachować};
+
+set search_path to s60praktyki;
+
+select * from persons WHERE person_id='33268b94-2a73-4e26-963a-86de19fa5f21';
+
+INSERT INTO persons (person_id, name, email, phone, album, roles, active, password, student_id)
+         VALUES ('33268b94-2a73-4e26-963a-86de19fa5f21', 'Bob', 'bobo@bob.com', '+48 666 666 666','sp01', '{3}', true, '123456abcdef*', '58956e08-6342-4b43-8c07-e289991ccd54');
+
+INSERT INTO companies (id, name, info, nip)
+VALUES ('107d471a-a522-483f-a61b-645547395b6e', 'SellYourSoul', 'dobrze placa', 8961565693);
+
+select * from companies;
+
+INSERT INTO curriculum_vitae (data, created_at, student_id)
+VALUES ('blabla', '2023-09-13 19:11:27.000000', '58956e08-6342-4b43-8c07-e289991ccd54');
+
+select * from curriculum_vitae;
+
+DELETE FROM persons WHERE person_id != '11111111-1111-1111-1111-111111111111';

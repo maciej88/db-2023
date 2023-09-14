@@ -19,17 +19,40 @@ depends_on = None
 
 def upgrade() -> None:
     op.execute("""
-    ALTER TABLE persons RENAME COLUMN studentid TO student_id;
-    ALTER TABLE persons
-    ALTER COLUMN student_id TYPE UUID USING student_id::UUID;   
+    ALTER TABLE curriculum_vitae
+    DROP CONSTRAINT curriculum_vitae_persons CASCADE;
+    
+    ALTER TABLE persons DROP COLUMN IF EXISTS studentid;
+    
+    ALTER TABLE persons ADD COLUMN student_id uuid UNIQUE;
+    
+    ALTER TABLE curriculum_vitae DROP COLUMN IF EXISTS studentid;
+    
+    ALTER TABLE curriculum_vitae ADD COLUMN student_id uuid UNIQUE;
+    
+    ALTER TABLE curriculum_vitae
+    ADD CONSTRAINT curriculum_vitae_persons
+    FOREIGN KEY (student_id) REFERENCES persons (student_id) ON DELETE CASCADE;
+       
                """)
 
 
 def downgrade() -> None:
     op.execute(
         """
-        ALTER TABLE persons
-        ALTER COLUMN student_id TYPE INTEGER USING student_id::INTEGER; 
-        ALTER TABLE persons RENAME COLUMN student_id TO studentid
+        ALTER TABLE curriculum_vitae
+        DROP CONSTRAINT curriculum_vitae_persons CASCADE;
+        
+        ALTER TABLE curriculum_vitae DROP COLUMN IF EXISTS student_id;
+        
+        ALTER TABLE curriculum_vitae ADD COLUMN studentid uuid;
+        
+        ALTER TABLE persons DROP COLUMN IF EXISTS student_id;
+        
+        ALTER TABLE persons ADD COLUMN studentid INTEGER;
+        
+        ALTER TABLE  curriculum_vitae
+        ADD CONSTRAINT curriculum_vitae_persons
+        FOREIGN KEY (studentid) REFERENCES persons ON DELETE CASCADE;
         """
     )
