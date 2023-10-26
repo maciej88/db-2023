@@ -98,6 +98,17 @@ class DbService:
             except RuntimeError as e:
                 print(f'runtime error error for {eid=}, {uid=}')
 
+    async def goo(self):
+        async with self.pool.acquire() as c:
+            res = await c.fetchrow("select * from users where name like 'X%' order by name")
+            print(res)
+            print(type(res))
+        if res:
+            print('znaleziono wyniki')
+        else:
+            print('nie ma wyników')
+
+
     async def vote(self, tokenid: uuid, votevalue: int) -> uuid:
         """
         User with token `tokenid` votes in election. Appropriate row is created in Votes; token is removed.
@@ -161,14 +172,16 @@ def ts():
 
 
 async def main():
-    # db = DbService()
-    # await db.initialize()
+    db = DbService()
+    await db.initialize()
     # uid = uuid4()
     # user = await db.create_user(User(uid, 'xi'))
     # await db.delete_user(user.uid)
     #
     # elect = await db.create_election(Election(uid, 'Wybory normalne'))
     # await db.delete_election(elect.eid)
+    await db.goo()
+
     pass
 
 
